@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Web Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/4.1.0/mustache.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <div class="sidebar">
+            <button class="new-chat-btn">
+                <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                New Chat
+            </button>
+        </div>
+        <div class="chat-container">
+            <div class="chat" id="chat"></div>
+            <div class="message-input">
+                <div class="message-row" style="background:transparent;">
+                    <div class="message" style="margin-bottom:0px;">
+                        <input type="text" id="message-input" placeholder="Type your message...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        Mustache.tags = ['[[', ']]'];
+    </script>
+    <script id="chat-template" type="text/html">
+      <div class="message-row">
+        <div class="message [[sender]]">
+          <span>[[&message]]</span>
+            [[#token_info]]
+      <p class="token-info">[[token_info]]</p>
+      [[/token_info]]
+        </div>
+      </div>
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

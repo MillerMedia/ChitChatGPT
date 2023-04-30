@@ -21,6 +21,9 @@ model_to_use = 'gpt-4'
 
 PRICE_PER_TOKEN = 0.00006
 
+# Only for testing!
+os.environ['VERIFY_SSL'] = 'False'
+
 
 @app.route("/")
 def index():
@@ -41,7 +44,10 @@ def get_response():
     truncated_chat_history = []
 
     for message in reversed(chat_history):
-        message_tokens = len(tokenizer.encode(message))
+        if "tokens_used" in message:
+            del message["tokens_used"]
+
+        message_tokens = len(tokenizer.encode(message["content"]))
         if history_tokens + message_tokens <= MAX_HISTORY_TOKENS:
             history_tokens += message_tokens
             truncated_chat_history.insert(0, message)
@@ -75,17 +81,20 @@ def get_response():
         else:  # Non-code segment
             formatted_segments.append(segment)
 
-    # If the delimiter is not used, wrap the entire response in a single <p> element
-    if len(formatted_segments) == 1:
-        formatted_message = Markup(f'<p>{formatted_segments[0]}</p>')
-    else:
-        formatted_message = Markup(formatted_segments)
-
     tokens_used = response['usage']['total_tokens']
     total_tokens_used += tokens_used
     token_cost = tokens_used * PRICE_PER_TOKEN
 
-    return jsonify({"message": formatted_message, "tokens_used": tokens_used, "token_cost": token_cost})
+    formatted_message = ''.join(formatted_segments)
+
+    return_data = {
+        "message": formatted_message,
+        "plain_message": message,
+        "tokens_used": tokens_used,
+        "token_cost": token_cost
+    }
+
+    return jsonify(return_data)
 
 
 @app.route("/get_total_tokens_used", methods=["GET"])
@@ -94,39 +103,35 @@ def get_total_tokens_used():
     return jsonify({"total_tokens_used": total_tokens_used})
 
 
-@app.route('/save_chat', methods=['POST'])
+@app.route("/save_chat", methods=["POST"])
 def save_chat():
-    chat_data = request.json["chat_data"]
-    timestamp = int(time.time())
-    file_name = f'chat_{timestamp}'
+    data = request.get_json()
+    chat_data = data["chat_data"]
 
-    # Save the session_id with the chat data
-    chat_data_to_save = {
-        'content': chat_data
-    }
+    saved_chats_dir = "saved_chats"
+    if not os.path.exists(saved_chats_dir):
+        os.makedirs(saved_chats_dir)
 
-    with open(f'chats/{file_name}.json', 'w') as f:
-        json.dump(chat_data_to_save, f)
+    for chat_id, chat in chat_data.items():
+        with open(f"{saved_chats_dir}/chat_{chat_id}.json", "w") as outfile:
+            json.dump(chat, outfile)
 
-    print(f'Saved chat data: {chat_data}')
-
-    return jsonify({"status": "success", "file_name": file_name})
+    return jsonify({"status": "success"})
 
 
 @app.route('/get_saved_chats', methods=['GET'])
 def get_saved_chats():
-    if not os.path.exists('chats'):
-        os.makedirs('chats')
+    if not os.path.exists('saved_chats'):
+        os.makedirs('saved_chats')
 
     saved_chats = {}
-    for file in os.listdir('chats'):
+    for file in os.listdir('saved_chats'):
         if file.endswith('.json'):
-            with open(f'chats/{file}', 'r') as f:
+            with open(f'saved_chats/{file}', 'r') as f:
                 chat_data = json.load(f)
-                if 'content' in chat_data:
-                    chat_id = os.path.splitext(file)[0]
-                    timestamp = list(chat_data['content'].keys())[0]
-                    saved_chats[chat_id] = chat_data['content'][timestamp]
+                chat_id = os.path.splitext(file)[0]
+                saved_chats[chat_id] = chat_data
+
     return jsonify({'saved_chats': saved_chats})
 
 
@@ -134,8 +139,8 @@ def get_saved_chats():
 def load_chat():
     file_name = request.json["file_name"]
 
-    if os.path.exists(f'chats/{file_name}.json'):
-        with open(f'chats/{file_name}.json', 'r') as f:
+    if os.path.exists(f'saved_chats/{file_name}.json'):
+        with open(f'saved_chats/{file_name}.json', 'r') as f:
             chat_data = json.load(f)
         print(f'Loaded chat data: {chat_data}')
         return jsonify({"chat_data": chat_data})
@@ -144,6 +149,7 @@ def load_chat():
 
 
 if __name__ == '__main__':
-    if not os.path.exists('chats'):
-        os.makedirs('chats')
+    if not os.path.exists('saved_chats'):
+        os.makedirs('saved_chats')
     app.run(debug=True)
+

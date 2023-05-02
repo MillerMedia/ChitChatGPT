@@ -58,6 +58,7 @@ h1 {
     background-color: transparent;
     padding: 0;
     overflow-y: scroll;
+    margin-bottom:25px;
 }
 
 .message-row {

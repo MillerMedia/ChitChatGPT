@@ -47,6 +47,9 @@ def get_response():
         if "tokens_used" in message:
             del message["tokens_used"]
 
+        if "token_cost" in message:
+            del message["token_cost"]
+
         message_tokens = len(tokenizer.encode(message["content"]))
         if history_tokens + message_tokens <= MAX_HISTORY_TOKENS:
             history_tokens += message_tokens

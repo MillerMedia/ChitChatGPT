@@ -16,32 +16,28 @@ Please ensure that you have set up billing limits on your OpenAI account before 
 
 1. Clone the repository and navigate to the project directory:
 
-```
-git clone https://github.com/yourusername/ChitChatGPT.git
+```bash
+git clone https://github.com/MillerMedia/ChitChatGPT.git
 cd ChitChatGPT
 ```
 
-
 2. Install the required dependencies:
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
-
 3. Set up your OpenAI API key:
 
-```
+```bash
 export OPENAI_API_KEY="your-api-key"
 ```
 
-
 4. Start the Flask web server:
 
-```
+```bash
 python app.py
 ```
-
 
 5. Open a web browser and navigate to `http://127.0.0.1:5000/` to interact with the ChitChatGPT web application.
 
@@ -50,3 +46,17 @@ python app.py
 Enter your text prompt in the input field on the web page and click "Send" to submit the prompt to GPT-4. The AI-generated response will appear below your prompt, along with the cost of the message.
 
 Enjoy chatting with GPT-4!
+
+## Contributing
+
+We welcome contributions from the community! If you have any suggestions, bug reports, or ideas for improvement, feel free to open an issue or submit a pull request.
+
+## Support the project
+
+If you find this project helpful and would like to support its development, please consider donating:  
+  
+[![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/yOd1JU9MQe)
+
+## License
+
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the [LICENSE](LICENSE) file for more information.
